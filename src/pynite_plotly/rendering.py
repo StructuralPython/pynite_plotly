@@ -34,7 +34,7 @@ class Renderer:
             annotation_text="black",
             annotation_point="grey",
             point_label_text="green",
-            spring="grey",
+            spring="magenta",
             node="grey",
             member="black",
             deformed_member="red",
@@ -420,14 +420,16 @@ class Renderer:
             and node.support_RZ
         ):
             # Create a cube using PyVista
+            # swapped_center = (node.X, node.Z, node.Y)
             self.plotter.add_trace(
-                prims.cube(
+                swap_y_z_data(prims.cube(
                     center=(node.X, node.Y, node.Z),
+                    # center=swapped_center,
                     x_length=self.annotation_size * 2,
                     y_length=self.annotation_size * 2,
                     z_length=self.annotation_size * 2,
                     color=self.colors["node"],
-                ),
+                ))
             )
 
         # Check for a pinned support
@@ -440,14 +442,16 @@ class Renderer:
             and not node.support_RZ
         ):
             # Create a cone using PyVista's Cone function
+            swapped_center = (node.X, node.Z, node.Y - self.annotation_size)
             self.plotter.add_trace(
-                prims.cone(
+                swap_y_z_data(prims.cone(
                     center=(node.X, node.Y - self.annotation_size, node.Z),
+                    # center=swapped_center,
                     direction=(0, 1, 0),
                     height=self.annotation_size * 2,
                     radius=self.annotation_size * 2,
                     color=self.colors["node"]
-                )
+                ))
             )
 
         # Other support conditions
@@ -460,32 +464,36 @@ class Renderer:
             if node.support_DX:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X - self.annotation_size, node.Y, node.Z),
                         (node.X + self.annotation_size, node.Y, node.Z),
+                        # (node.X - self.annotation_size, node.Z, node.Y),
+                        # (node.X + self.annotation_size, node.Z, node.Y),
                         color=self.colors["node"],
-                    )
+                    ))
                 )
 
                 # Cones at both ends
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X - self.annotation_size, node.Y, node.Z),
+                        # center=(node.X - self.annotation_size, node.Z, node.Y),
                         direction=(1, 0, 0),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X + self.annotation_size, node.Y, node.Z),
+                        # center=(node.X + self.annotation_size, node.Z, node.Y),
                         direction=(-1, 0, 0),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
@@ -493,32 +501,36 @@ class Renderer:
             if node.support_DY:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X, node.Y - self.annotation_size, node.Z),
                         (node.X, node.Y + self.annotation_size, node.Z),
+                        # (node.X, node.Z, node.Y - self.annotation_size),
+                        # (node.X, node.Z, node.Y + self.annotation_size),
                         color=self.colors["node"],
-                    )
+                    ))
                 )
 
                 # Cones at both ends
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X, node.Y - self.annotation_size, node.Z),
+                        # center=(node.X, node.Z, node.Y - self.annotation_size),
                         direction=(0, 1, 0),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    ),
+                    ))
 
                 )
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X, node.Y + self.annotation_size, node.Z),
+                        # center=(node.X, node.Z, node.Y + self.annotation_size),
                         direction=(0, -1, 0),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
@@ -526,33 +538,37 @@ class Renderer:
             if node.support_DZ:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X, node.Y, node.Z - self.annotation_size),
                         (node.X, node.Y, node.Z + self.annotation_size),
+                        # (node.X, node.Z - self.annotation_size, node.Y),
+                        # (node.X, node.Z + self.annotation_size, node.Y),
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
                 # Cones at both ends
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X, node.Y, node.Z - self.annotation_size),
+                        # center=(node.X, node.Z - self.annotation_size, node.Y),
                         direction=(0, 0, 1),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
                 self.plotter.add_trace(
-                    prims.cone(
+                    swap_y_z_data(prims.cone(
                         center=(node.X, node.Y, node.Z + self.annotation_size),
+                        # center=(node.X, node.Z + self.annotation_size, node.Y),
                         direction=(0, 0, -1),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
@@ -560,65 +576,73 @@ class Renderer:
             if node.support_RX:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X - 1.6 * self.annotation_size, node.Y, node.Z),
                         (node.X + 1.6 * self.annotation_size, node.Y, node.Z),
+                        # (node.X - 1.6 * self.annotation_size, node.Z, node.Y),
+                        # (node.X + 1.6 * self.annotation_size, node.Z, node.Y),
                         color=self.colors["node"],                    
-                    )
+                    ))
 
                 )
 
                 # Cubes at both ends
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X - 1.9 * self.annotation_size, node.Y, node.Z),
+                        # center=(node.X - 1.9 * self.annotation_size, node.Z, node.Y),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X + 1.9 * self.annotation_size, node.Y, node.Z),
+                        # center=(node.X + 1.9 * self.annotation_size, node.Z, node.Y),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
-                    )
+                    ))
                 )
 
             # Restrained against rotation about the Y-axis
             if node.support_RY:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X, node.Y - 1.6 * self.annotation_size, node.Z),
                         (node.X, node.Y + 1.6 * self.annotation_size, node.Z),
+                        # (node.X, node.Z, node.Y - 1.6 * self.annotation_size),
+                        # (node.X, node.Z, node.Y + 1.6 * self.annotation_size),
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
                 # Cubes at both ends
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X, node.Y - 1.9 * self.annotation_size, node.Z),
+                        # center=(node.X, node.Z, node.Y - 1.9 * self.annotation_size),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
-                    )
+                    ))
                 )
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X, node.Y + 1.9 * self.annotation_size, node.Z),
+                        # center=(node.X, node.Z, node.Y + 1.9 * self.annotation_size),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
@@ -626,32 +650,36 @@ class Renderer:
             if node.support_RZ:
                 # Line showing support direction
                 self.plotter.add_trace(
-                    prims.line(
+                    swap_y_z_data(prims.line(
                         (node.X, node.Y, node.Z - 1.6 * self.annotation_size),
                         (node.X, node.Y, node.Z + 1.6 * self.annotation_size),
+                        # (node.X, node.Z - 1.6 * self.annotation_size, node.Y),
+                        # (node.X, node.Z + 1.6 * self.annotation_size, node.Y),                        
                         color=self.colors["node"],
-                    )
+                    ))
 
                 )
 
                 # Cubes at both ends
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X, node.Y, node.Z - 1.9 * self.annotation_size),
+                        # center=(node.X, node.Z - 1.9 * self.annotation_size, node.Y),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
-                    ),
+                    ))
                 )
                 self.plotter.add_trace(
-                    prims.cube(
+                    swap_y_z_data(prims.cube(
                         center=(node.X, node.Y, node.Z + 1.9 * self.annotation_size),
+                        # center=(node.X, node.Z + 1.9 * self.annotation_size, node.Y),
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
-                        color=self.colors["node"],
-                    )
+                        color=self.colors["node"]
+                    ))
                 )
 
     def plot_member(self, member, theme="default"):
@@ -663,10 +691,18 @@ class Renderer:
         Yj = member.j_node.Y
         Zj = member.j_node.Z
 
+        # Xi = member.i_node.X
+        # Yi = member.i_node.Z
+        # Zi = member.i_node.Y
+
+        # Xj = member.j_node.X
+        # Yj = member.j_node.Z
+        # Zj = member.j_node.Y
+
         self.plotter.add_trace(
-            prims.line(
+            swap_y_z_data(prims.line(
                 (Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["member"], line_width=self.line_widths["member"]
-            )
+            ))
         )
 
     def plot_spring(self, spring, size, color="grey"):
@@ -675,6 +711,8 @@ class Renderer:
         j_node = spring.j_node
         Xi, Yi, Zi = i_node.X, i_node.Y, i_node.Z
         Xj, Yj, Zj = j_node.X, j_node.Y, j_node.Z
+        # Xi, Yi, Zi = i_node.X, i_node.Z, i_node.Y
+        # Xj, Yj, Zj = j_node.X, j_node.Z, j_node.Y
 
         # Create the line
         line = prims.line((Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["spring"])
@@ -682,9 +720,9 @@ class Renderer:
         # Add the spring label to the list of labels
         self._spring_labels.append(spring.name)
         self._spring_label_points.append([(Xi + Xj) / 2, (Yi + Yj) / 2, (Zi + Zj) / 2])
-
+        # self._spring_label_points.append([(Xi + Xj) / 2, (Zi + Zj) / 2, (Yi + Yj) / 2])
         # Add the line to the plotter
-        self.plotter.add_trace(line)
+        self.plotter.add_trace(swap_y_z_data(line))
 
     def plot_plates(self, deformed_shape, deformed_scale, color_map, combo_name):
         raise NotImplementedError("Plotting plates is not currently implemented")
@@ -783,11 +821,12 @@ class Renderer:
         sphere = prims.sphere(
             radius=0.4 * self.annotation_size,
             center=[newX, newY, newZ],
+            # center=[newX, newZ, newY],
             color=self.colors["node"],
         )
 
         # Add the mesh to the plotter
-        self.plotter.add_trace(sphere)
+        self.plotter.add_trace(swap_y_z_data(sphere))
 
     def plot_deformed_member(self, member, scale_factor):
         # Determine if this member is active for each load combination
@@ -795,6 +834,7 @@ class Renderer:
             L = member.L()  # Member length
             T = member.T()  # Member local transformation matrix
 
+            ## ORIGINAL
             cos_x = np.array([T[0, 0:3]])  # Direction cosines of local x-axis
             cos_y = np.array([T[1, 0:3]])  # Direction cosines of local y-axis
             cos_z = np.array([T[2, 0:3]])  # Direction cosines of local z-axis
@@ -846,7 +886,17 @@ class Renderer:
                     color=self.colors["deformed_member"],
                     line_width=self.line_widths["deformed_member"],
                 )
-                self.plotter.add_trace(line)
+
+                # #SWAPPING
+                # point_a = D_plot[i]
+                # point_b = D_plot[i + 1]
+                # line = prims.line(
+                #     (point_a[0], point_a[2], point_a[1]),
+                #     (point_b[0], point_b[2], point_b[1]),
+                #     color=self.colors["deformed_member"],
+                #     line_width=self.line_widths["deformed_member"],
+                # )
+                self.plotter.add_trace(swap_y_z_data(line))
 
     def plot_deformed_spring(self, spring, scale_factor, combo_name="Combo 1"):
         # Determine if the spring is active for the load combination
@@ -866,12 +916,18 @@ class Renderer:
 
             # Plot a line for the deformed spring
             self.plotter.add_trace(
-                prims.line(
+                swap_y_z_data(prims.line(
                     (Xi, Yi, Zi),
                     (Xj, Yj, Zj),
                     color=self.colors["spring"],
                     line_width=self.line_widths["spring"],
-                )
+                ))
+                # prims.line(
+                #     (Xi, Zi, Yi),
+                #     (Xj, Zj, Yj),
+                #     color=self.colors["spring"],
+                #     line_width=self.line_widths["spring"],
+                # )
             )
 
     def plot_pt_load(self, position, direction, length, label_text=None, color="green"):
@@ -889,18 +945,24 @@ class Renderer:
         radius = abs(length) / 16
         tip = prims.cone(
             center=(
-                position[0] - tip_length * sign * unitVector[0] / 2,
-                position[1] - tip_length * sign * unitVector[1] / 2,
-                position[2] - tip_length * sign * unitVector[2] / 2,
+                position[0] - tip_length * sign * unitVector[0],
+                position[1] - tip_length * sign * unitVector[1],
+                position[2] - tip_length * sign * unitVector[2],
             ),
+            # center=(
+            #     position[0] - tip_length * sign * unitVector[0] / 2,
+            #     position[2] - tip_length * sign * unitVector[2] / 2,
+            #     position[1] - tip_length * sign * unitVector[1] / 2,
+            # ),
             direction=(direction[0] * sign, direction[1] * sign, direction[2] * sign),
+            # direction=(direction[0] * sign, direction[2] * sign, direction[1] * sign),            
             height=tip_length,
             radius=radius,
             color=self.colors["pt_load"]
         )
 
         # Plot the tip
-        self.plotter.add_trace(tip)
+        self.plotter.add_trace(swap_y_z_data(tip))
 
         # Create the shaft (you'll need to specify the second point)
         X_tail = position[0] - unitVector[0] * length
@@ -912,14 +974,21 @@ class Renderer:
             line_width=self.line_widths["loads"], 
             color=self.colors["pt_load"]
         )
+        # shaft = prims.line(
+        #     pointa=(position[0], position[2], position[1]), 
+        #     pointb=(X_tail, Z_tail, Y_tail),
+        #     line_width=self.line_widths["loads"], 
+        #     color=self.colors["pt_load"]
+        # )
 
         # Save the data necessary to create the load's label
         if label_text is not None:
             self._load_labels.append(sig_fig_round(label_text, 3))
             self._load_label_points.append([X_tail, Y_tail, Z_tail])
+            # self._load_label_points.append([X_tail, Z_tail, Y_tail])
 
         # Plot the shaft
-        self.plotter.add_trace(shaft)
+        self.plotter.add_trace(swap_y_z_data(shaft))
 
     def plot_dist_load(
         self,
@@ -992,8 +1061,16 @@ class Renderer:
             color=self.colors["dist_load"],
         )
 
+        # point_a = position1 - dir_dir_cos * length1
+        # point_b = position2 - dir_dir_cos * length2
+        # tail_line = prims.line(
+        #     point_a[0], point_a[2], point_a[1],
+        #     point_b[0], point_b[2], point_b[1],
+        #     color=self.colors["dist_load"],
+        # )
+
         # Combine all geometry into a single PolyData object
-        self.plotter.add_trace(tail_line)
+        self.plotter.add_trace(swap_y_z_data(tail_line))
 
     def plot_moment(self, center, direction, radius, label_text=None, color="green"):
         # Convert the direction vector into a unit vector
@@ -1014,9 +1091,20 @@ class Renderer:
             line_width=self.line_widths["loads"],
             return_points=True
         )
+        # polar = v2 * radius
+        # arc, pts = prims.circular_arc_from_normal(
+        #     center,
+        #     resolution=20,
+        #     normal=np.array([v1[0], v1[2], v1[1]]),
+        #     angle=215,
+        #     polar=np.array([polar[0], polar[2], polar[1]]),
+        #     color=self.colors["moment_load"],
+        #     line_width=self.line_widths["loads"],
+        #     return_points=True
+        # )
 
         # Add the arc to the plot
-        self.plotter.add_trace(arc)
+        self.plotter.add_trace(swap_y_z_data(arc))
 
         # Generate the arrow tip at the end of the arc
         tip_length = radius / 4
@@ -1029,15 +1117,28 @@ class Renderer:
             radius=cone_radius,
             color=self.colors["moment_load"],
         )
+        ## Swapped
+        # cone_direction = -np.cross(v1, center - pts[0])
+        # tip = prims.cone(
+        #     center=np.array([pts[0][0], pts[0][2], pts[0][1]]),
+        #     direction=np.array([cone_direction[0], cone_direction[2], cone_direction[1]]),
+        #     height=tip_length,
+        #     radius=cone_radius,
+        #     color=self.colors["moment_load"],
+        # )
 
         # Add the tip to the plot
-        self.plotter.add_trace(tip)
+        self.plotter.add_trace(swap_y_z_data(tip))
 
         # Create the text label
         if label_text:
             text_pos = center + (radius + 0.25 * self.annotation_size) * v2
             self._load_label_points.append(text_pos)
             self._load_labels.append(label_text)
+        # if label_text:
+        #     text_pos = center + (radius + 0.25 * self.annotation_size) * v2
+        #     self._load_label_points.append(np.array([text_pos[0], text_pos[2], text_pos[1]]))
+        #     self._load_labels.append(label_text)
 
     def plot_area_load(
         self,
@@ -1584,15 +1685,30 @@ class Renderer:
             label = labels[idx]
             x, y, z = point
             text_label = f"{start_bold_tag}{label}{end_bold_tag}"
+            # annotations.append(
+            #     dict(
+            #         x=x, 
+            #         y=y, 
+            #         z=z, 
+            #         text=text_label,
+            #         font=dict(
+            #             color=self.colors['point_label_text']
+            #         ),
+            #     )
+            # )
             annotations.append(
                 dict(
                     x=x, 
-                    y=y, 
-                    z=z, 
+                    y=z, 
+                    z=y, 
                     text=text_label,
+                    showarrow=False,
                     font=dict(
-                        color=self.colors['point_label_text']
+                        color=self.colors['point_label_text'],
+                        size=16
                     ),
+                    yshift=5,
+                    xshift=5
                 )
             )
 
@@ -1641,29 +1757,52 @@ def default_layout(title: str):
     layout.title = title
     layout.scene = dict(
         camera = dict(
-            eye=dict(x=0, y=0, z=4),
+            eye=dict(x=0, y=-4, z=0),
             up=dict(x=0, y=1., z=0),
         ),
-
         xaxis = dict(
             backgroundcolor="rgba(0, 0, 0,0)",
             gridcolor="white",
             showbackground=True,
-            zerolinecolor="white",),
+            zerolinecolor="white",
+            title="X",
+        ),
         yaxis = dict(
             backgroundcolor="rgba(0, 0, 0,0)",
             gridcolor="white",
             showbackground=True,
-            zerolinecolor="white"),
+            zerolinecolor="white",
+            title="Z",
+            autorange="reversed",
+        ),
         zaxis = dict(
             backgroundcolor="rgba(0, 0, 0,0)",
             gridcolor="white",
             showbackground=True,
-            zerolinecolor="white",),
+            zerolinecolor="white",
+            title="Y",
+        ),
         aspectmode = "data",
+        dragmode="turntable"
     )
     layout.legend.visible = False
     return layout
+
+
+def swap_y_z_data(trace: go.Trace) -> go.Trace:
+    """
+    Mutates the trace so that the y coordinates is in the z arg and the
+    z coordinates are in the y arg.
+    This is because PyNiteFEA uses a convention of Y representing the gravity
+    direction where plotly uses Z to represent the gravity direction.
+
+    This function is to aid in "swapping" the Y and Z axes so that the turntable
+    lock button on the Plotly plot works as one would want (rotating about the
+    gravity (Y) direciton).
+    """
+    trace.x, trace.z, trace.y = np.array(trace.x), np.array(trace.y), np.array(trace.z)
+    trace.hovertemplate = "X=%{x:.3f}<br>Y=%{z:.3f}<br>Z=%{y:.3f}<br>"
+    return trace
 
 
 def _PrepContour(model, stress_type="Mx", combo_name="Combo 1"):
