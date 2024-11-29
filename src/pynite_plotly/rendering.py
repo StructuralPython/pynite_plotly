@@ -14,23 +14,12 @@ class Renderer:
 
     scalar = None
 
-    def __init__(self, model):
-        self.model = model
-
-        # Default settings for rendering
-        self._annotation_size = 5
-        self._deformed_shape = False
-        self._deformed_scale = 30
-        self._render_nodes = True
-        self._render_loads = True
-        self._color_map = None
-        self._combo_name = "Combo 1"
-        self._case = None
-        self._labels = True
-        self._scalar_bar = False
-        self._scalar_bar_text_size = 24
-        self.theme = "default"
-        self.colors = dict(
+    def __init__(
+        self, 
+        model,
+        combo_name: str,
+        annotation_size: int = 5,
+        colors: dict = dict(
             annotation_text="black",
             annotation_point="grey",
             point_label_text="green",
@@ -42,22 +31,46 @@ class Renderer:
             dist_load="green",
             moment_load="green",
             area_load="green",
-        )
-        self.line_widths = dict(
+        ),
+        deformed_scale: float = 30.0,
+        deformed_shape: bool = False,
+        labels: bool = True,
+        line_widths = dict(
             member=4,
             loads=2,
             deformed_member=2,
             spring=3
-        )
+        ),
+        title: str = "Pynite - Simple Finite Element Analysis for Python",
+        window_height: int = 800,
+        window_width: int = 800,
+    ):
+        self.model = model
 
+        # Default settings for rendering
+        self._annotation_size = annotation_size
+        self._deformed_shape = deformed_shape
+        self._deformed_scale = deformed_scale
+        self._render_nodes = True
+        self._render_loads = True
+        self._color_map = None
+        self._combo_name = combo_name
+        self._case = None
+        self._labels = labels
+        self._scalar_bar = False
+        self._scalar_bar_text_size = 24
+        self.theme = "default"
+        self.colors = colors
+        self.line_widths = line_widths
         self._title = "Pynite - Simple Finite Element Analysis for Python"
-
+        self._window_width = window_width
+        self._window_height = window_height
         self.plotter = None
 
 
         self._layout = default_layout(self._title)
-        self.window_width = 800
-        self.window_height = 800
+        self._layout.width = window_width
+        self._layout.height = window_height
 
         # self.plotter.set_background('white')  # Setting background color
         # # self.plotter.add_logo_widget('./Resources/Full Logo No Buffer - Transparent.png')
@@ -72,6 +85,7 @@ class Renderer:
         # Initialize spring labels
         self._spring_label_points = []
         self._spring_labels = []
+        self._annotations = []
 
     ## Get Figure Size
 
@@ -207,7 +221,6 @@ class Renderer:
         self.update(reset_camera)
 
         # Render the model (code execution will pause here until the user closes the window)
-        self.plotter.show()
         return self.plotter
 
     def screenshot(
@@ -271,8 +284,7 @@ class Renderer:
         # Clear out the old plot (if any)
         self.plotter = go.Figure()
 
-        layout = default_layout(self._title)
-        self._layout = layout
+        layout = self._layout
 
         ## Set the layout
         self.plotter.layout = self._layout
@@ -1671,6 +1683,8 @@ class Renderer:
         point_size: int = 5,
         shape: str = None,
         render_points_as_spheres=False,
+        x_shift=0,
+        y_shift=0
     ):
         assert len(points) == len(labels)
         # if show_points or render_points_as_spheres or shape:
@@ -1685,17 +1699,14 @@ class Renderer:
             label = labels[idx]
             x, y, z = point
             text_label = f"{start_bold_tag}{label}{end_bold_tag}"
-            # annotations.append(
-            #     dict(
-            #         x=x, 
-            #         y=y, 
-            #         z=z, 
-            #         text=text_label,
-            #         font=dict(
-            #             color=self.colors['point_label_text']
-            #         ),
-            #     )
-            # )
+            if render_points_as_spheres:
+                ...
+                self.plotter.add_trace(
+                    go.Scatter3d(
+                        x=[x], y=[y], z=[z], marker=dict(color=point_color, size=self.annotation_size/30)
+                    )
+                )
+            # print(f"Annotation: {text_label=} | {point=}")
             annotations.append(
                 dict(
                     x=x, 
@@ -1704,15 +1715,15 @@ class Renderer:
                     text=text_label,
                     showarrow=False,
                     font=dict(
-                        color=self.colors['point_label_text'],
+                        color=text_color,
                         size=16
                     ),
-                    yshift=5,
-                    xshift=5
+                    yshift=y_shift,
+                    xshift=x_shift,
                 )
             )
-
-        self.plotter.update_layout(scene=dict(annotations=annotations))
+        self._annotations += annotations
+        self.plotter.update_layout(scene=dict(annotations=self._annotations))
         # TODO: Show points
 
 
