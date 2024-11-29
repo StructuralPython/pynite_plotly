@@ -14,23 +14,12 @@ class Renderer:
 
     scalar = None
 
-    def __init__(self, model):
-        self.model = model
-
-        # Default settings for rendering
-        self._annotation_size = 5
-        self._deformed_shape = False
-        self._deformed_scale = 30
-        self._render_nodes = True
-        self._render_loads = True
-        self._color_map = None
-        self._combo_name = "Combo 1"
-        self._case = None
-        self._labels = True
-        self._scalar_bar = False
-        self._scalar_bar_text_size = 24
-        self.theme = "default"
-        self.colors = dict(
+    def __init__(
+        self, 
+        model,
+        combo_name: str,
+        annotation_size: int = 5,
+        colors: dict = dict(
             annotation_text="black",
             annotation_point="grey",
             point_label_text="green",
@@ -42,7 +31,36 @@ class Renderer:
             dist_load="green",
             moment_load="green",
             area_load="green",
-        )
+        ),
+        deformed_scale: float = 30.0,
+        deformed_shape: bool = False,
+        labels: bool = True,
+        line_widths = dict(
+            member=4,
+            loads=2,
+            deformed_member=2,
+            spring=3
+        ),
+        title: str = "Pynite - Simple Finite Element Analysis for Python",
+        height: int = 800,
+        width: int = 800,
+    ):
+        self.model = model
+
+        # Default settings for rendering
+        self._annotation_size = annotation_size
+        self._deformed_shape = deformed_shape
+        self._deformed_scale = deformed_scale
+        self._render_nodes = True
+        self._render_loads = True
+        self._color_map = None
+        self._combo_name = combo_name
+        self._case = None
+        self._labels = labels
+        self._scalar_bar = False
+        self._scalar_bar_text_size = 24
+        self.theme = "default"
+        self.colors = colors
         self.line_widths = dict(
             member=4,
             loads=2,
@@ -56,8 +74,8 @@ class Renderer:
 
 
         self._layout = default_layout(self._title)
-        self.window_width = 800
-        self.window_height = 800
+        self.window_width = width
+        self.window_height = height
 
         # self.plotter.set_background('white')  # Setting background color
         # # self.plotter.add_logo_widget('./Resources/Full Logo No Buffer - Transparent.png')
