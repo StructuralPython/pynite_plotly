@@ -9,7 +9,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "ipykernel>=6.29.5",
-    "plotly-3d-primitives>=0.2.1",
+    "plotly-3d-primitives>=0.4.0",
 ]
 
 [build-system]
@@ -21,6 +21,6 @@ dev = [
     "ipykernel>=6.29.5",
     "nbformat>=5.10.4",
     "pandas>=2.2.3",
-    "pynitefea>=0.0.96",
+    "pynitefea>=1.0",
     "scipy>=1.14.1",
 ]
