@@ -1,6 +1,5 @@
 [project]
 name = "pynite-plotly"
-description = "Add your description here"
 readme = "README.md"
 dynamic = ["version", "description"]
 authors = [
