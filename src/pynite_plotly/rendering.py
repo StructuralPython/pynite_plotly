@@ -3,10 +3,47 @@ import warnings
 
 import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
 import plotly_3d_primitives as prims
 import math
 
 TRANSPARENT_WHITE = "rgba(0,0,0,0)"
+
+
+def plot_model(
+        model: "Pynite.FEModel3d",
+        combo_name: str,
+        annotation_size: int = 5, 
+        labels: bool = True,
+        title: str = "Pynite - Simple Finite Element Analysis for Python",
+        loads_color_map: str = "Plotly"
+) -> go.Figure:
+    """
+    Returns a plotly figure of the Pynite FEModel3D model. 
+
+    This is a convenience function that wraps pynite_plotly.Renderer
+    with a reduced amount of parameters to enable quick plotting.
+    For more detailed control over the plot, use pynite_plotly.Renderer.
+
+    'model': the Pynite.FEModel3D model
+    'combo_name': the load combination to plot loads from
+    'annotation_size': controls the scale of annotations relative
+        to the geometry. For US customary units, a value of around
+        5 seems to work. For SI units (in mm), a value of around
+        300 seems to work.
+    'labels': When True, labels such as node names and member names
+        are displayed.
+    'title': The title of the displayed plot
+    """
+    renderer = Renderer(
+        model=model,
+        combo_name=combo_name,
+        annotation_size=annotation_size,
+        labels=labels,
+        title=title,
+        load_color_sequence=loads_color_map
+    )
+    return renderer.render_model()
 
 
 class Renderer:
@@ -27,10 +64,10 @@ class Renderer:
             node="grey",
             member="black",
             deformed_member="red",
-            pt_load="green",
-            dist_load="green",
-            moment_load="green",
-            area_load="green",
+            # pt_load="green",
+            # dist_load="green",
+            # moment_load="green",
+            # area_load="green",
         ),
         deformed_scale: float = 30.0,
         deformed_shape: bool = False,
@@ -41,6 +78,7 @@ class Renderer:
             deformed_member=2,
             spring=3
         ),
+        load_color_sequence = "Dark2",
         title: str = "Pynite - Simple Finite Element Analysis for Python",
         window_height: int = 800,
         window_width: int = 800,
@@ -61,6 +99,7 @@ class Renderer:
         self._scalar_bar_text_size = 24
         self.theme = "default"
         self.colors = colors
+        self._load_color_sequence = load_color_sequence
         self.line_widths = line_widths
         self._title = "Pynite - Simple Finite Element Analysis for Python"
         self._window_width = window_width
@@ -203,6 +242,14 @@ class Renderer:
     @scalar_bar_text_size.setter
     def scalar_bar_text_size(self, text_size):
         self._scalar_bar_text_size = text_size
+
+    @property
+    def load_color_sequence(self):
+        return self._load_color_sequence
+    
+    @load_color_sequence.setter
+    def load_color_sequence(self, color_sequence):
+        self._load_color_sequence = color_sequence
 
     def render_model(self, reset_camera=True):
         """
@@ -462,15 +509,22 @@ class Renderer:
                     direction=(0, 1, 0),
                     height=self.annotation_size * 2,
                     radius=self.annotation_size * 2,
-                    color=self.colors["node"]
+                    color=self.colors["node"],
+                    showlegend=False
                 ))
             )
 
         # Other support conditions
         else:
             # Generate a sphere for the node
-            # sphere = prims.sphere(center=(X, Y, Z), radius=0.4*self.annotation_size)
-            # self.plotter.add_trace(sphere, name='Node: '+ node.name, color=color)
+            self.plotter.add_trace(
+                swap_y_z_data(prims.sphere(
+                    radius=self.annotation_size * 0.4,
+                    center=(node.X, node.Y, node.Z),
+                    color=self.colors['node'],
+                    showlegend=False
+                ))
+            )
 
             # Restrained against X translation
             if node.support_DX:
@@ -482,6 +536,7 @@ class Renderer:
                         # (node.X - self.annotation_size, node.Z, node.Y),
                         # (node.X + self.annotation_size, node.Z, node.Y),
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
 
@@ -494,6 +549,7 @@ class Renderer:
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -505,6 +561,7 @@ class Renderer:
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -519,6 +576,7 @@ class Renderer:
                         # (node.X, node.Z, node.Y - self.annotation_size),
                         # (node.X, node.Z, node.Y + self.annotation_size),
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
 
@@ -531,6 +589,7 @@ class Renderer:
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -542,6 +601,7 @@ class Renderer:
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -556,6 +616,7 @@ class Renderer:
                         # (node.X, node.Z - self.annotation_size, node.Y),
                         # (node.X, node.Z + self.annotation_size, node.Y),
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -569,6 +630,7 @@ class Renderer:
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -579,7 +641,8 @@ class Renderer:
                         direction=(0, 0, -1),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
-                        color=self.colors["node"]
+                        color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -593,7 +656,8 @@ class Renderer:
                         (node.X + 1.6 * self.annotation_size, node.Y, node.Z),
                         # (node.X - 1.6 * self.annotation_size, node.Z, node.Y),
                         # (node.X + 1.6 * self.annotation_size, node.Z, node.Y),
-                        color=self.colors["node"],                    
+                        color=self.colors["node"],
+                        showlegend=False,               
                     ))
 
                 )
@@ -607,6 +671,7 @@ class Renderer:
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -618,6 +683,7 @@ class Renderer:
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
 
@@ -631,6 +697,7 @@ class Renderer:
                         # (node.X, node.Z, node.Y - 1.6 * self.annotation_size),
                         # (node.X, node.Z, node.Y + 1.6 * self.annotation_size),
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -644,6 +711,7 @@ class Renderer:
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
                 self.plotter.add_trace(
@@ -654,6 +722,7 @@ class Renderer:
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -668,6 +737,7 @@ class Renderer:
                         # (node.X, node.Z - 1.6 * self.annotation_size, node.Y),
                         # (node.X, node.Z + 1.6 * self.annotation_size, node.Y),                        
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
 
                 )
@@ -681,6 +751,7 @@ class Renderer:
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
                         color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
                 self.plotter.add_trace(
@@ -690,7 +761,8 @@ class Renderer:
                         x_length=self.annotation_size * 0.6,
                         y_length=self.annotation_size * 0.6,
                         z_length=self.annotation_size * 0.6,
-                        color=self.colors["node"]
+                        color=self.colors["node"],
+                        showlegend=False,
                     ))
                 )
 
@@ -713,7 +785,7 @@ class Renderer:
 
         self.plotter.add_trace(
             swap_y_z_data(prims.line(
-                (Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["member"], line_width=self.line_widths["member"]
+                (Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["member"], line_width=self.line_widths["member"], showlegend=False,
             ))
         )
 
@@ -727,7 +799,7 @@ class Renderer:
         # Xj, Yj, Zj = j_node.X, j_node.Z, j_node.Y
 
         # Create the line
-        line = prims.line((Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["spring"])
+        line = prims.line((Xi, Yi, Zi), (Xj, Yj, Zj), color=self.colors["spring"], showlegend=False,)
 
         # Add the spring label to the list of labels
         self._spring_labels.append(spring.name)
@@ -835,6 +907,7 @@ class Renderer:
             center=[newX, newY, newZ],
             # center=[newX, newZ, newY],
             color=self.colors["node"],
+            showlegend=False,
         )
 
         # Add the mesh to the plotter
@@ -897,6 +970,7 @@ class Renderer:
                     D_plot[i + 1],
                     color=self.colors["deformed_member"],
                     line_width=self.line_widths["deformed_member"],
+                    showlegend=False,
                 )
 
                 # #SWAPPING
@@ -933,6 +1007,7 @@ class Renderer:
                     (Xj, Yj, Zj),
                     color=self.colors["spring"],
                     line_width=self.line_widths["spring"],
+                    showlegend=False,
                 ))
                 # prims.line(
                 #     (Xi, Zi, Yi),
@@ -942,7 +1017,7 @@ class Renderer:
                 # )
             )
 
-    def plot_pt_load(self, position, direction, length, label_text=None, color="green"):
+    def plot_pt_load(self, position, direction, length, label_text=None, color="green", **kwargs):
         # Create a unit vector in the direction of the 'direction' vector
         unitVector = direction / np.linalg.norm(direction)
 
@@ -970,7 +1045,8 @@ class Renderer:
             # direction=(direction[0] * sign, direction[2] * sign, direction[1] * sign),            
             height=tip_length,
             radius=radius,
-            color=self.colors["pt_load"]
+            color=color,
+            **kwargs
         )
 
         # Plot the tip
@@ -984,7 +1060,8 @@ class Renderer:
             pointa=position, 
             pointb=(X_tail, Y_tail, Z_tail),
             line_width=self.line_widths["loads"], 
-            color=self.colors["pt_load"]
+            color=color,
+            **kwargs
         )
         # shaft = prims.line(
         #     pointa=(position[0], position[2], position[1]), 
@@ -995,7 +1072,7 @@ class Renderer:
 
         # Save the data necessary to create the load's label
         if label_text is not None:
-            self._load_labels.append(sig_fig_round(label_text, 3))
+            self._load_labels.append([sig_fig_round(label_text, 3), color])
             self._load_label_points.append([X_tail, Y_tail, Z_tail])
             # self._load_label_points.append([X_tail, Z_tail, Y_tail])
 
@@ -1012,6 +1089,7 @@ class Renderer:
         label_text1,
         label_text2,
         color="green",
+        **kwargs
     ):
         # Calculate the length of the distributed load
         load_length = (
@@ -1043,6 +1121,12 @@ class Renderer:
         step = load_length / num_steps
 
         for i in range(num_steps + 1):
+            # Turn off "showlegend" so that we don't get a legend entry
+            # for every stick and cone in the dist load.
+            if i != 0:
+                showlegend = kwargs.get('showlegend')
+                if showlegend:
+                    kwargs['showlegend'] = False
             # Calculate the position (X, Y, Z) of this load arrow's point
             position = (
                 position1[0] + i * step * line_dir_cos[0],
@@ -1063,14 +1147,15 @@ class Renderer:
 
             # Plot the load arrow
             self.plot_pt_load(
-                position, dir_dir_cos, length, label_text, self.colors["dist_load"]
+                position, dir_dir_cos, length, label_text, color, **kwargs
             )
 
         # Draw a line between the first and last load arrow's tails (using cylinder here for better visualization)
         tail_line = prims.line(
             position1 - dir_dir_cos * length1,
             position2 - dir_dir_cos * length2,
-            color=self.colors["dist_load"],
+            color=color,
+            **kwargs
         )
 
         # point_a = position1 - dir_dir_cos * length1
@@ -1084,7 +1169,8 @@ class Renderer:
         # Combine all geometry into a single PolyData object
         self.plotter.add_trace(swap_y_z_data(tail_line))
 
-    def plot_moment(self, center, direction, radius, label_text=None, color="green"):
+    def plot_moment(self, center, direction, radius, load_case, label_text=None, color="green", **kwargs):
+        lc = load_case
         # Convert the direction vector into a unit vector
         v1 = direction / np.linalg.norm(direction)
 
@@ -1099,9 +1185,10 @@ class Renderer:
             normal=v1,
             angle=215,
             polar=v2 * radius,
-            color=self.colors["moment_load"],
+            color=color,
             line_width=self.line_widths["loads"],
-            return_points=True
+            return_points=True,
+            **kwargs
         )
         # polar = v2 * radius
         # arc, pts = prims.circular_arc_from_normal(
@@ -1127,7 +1214,8 @@ class Renderer:
             direction=cone_direction,
             height=tip_length,
             radius=cone_radius,
-            color=self.colors["moment_load"],
+            color=color,
+            **kwargs
         )
         ## Swapped
         # cone_direction = -np.cross(v1, center - pts[0])
@@ -1146,7 +1234,7 @@ class Renderer:
         if label_text:
             text_pos = center + (radius + 0.25 * self.annotation_size) * v2
             self._load_label_points.append(text_pos)
-            self._load_labels.append(label_text)
+            self._load_labels.append([label_text, color])
         # if label_text:
         #     text_pos = center + (radius + 0.25 * self.annotation_size) * v2
         #     self._load_label_points.append(np.array([text_pos[0], text_pos[2], text_pos[1]]))
@@ -1161,7 +1249,9 @@ class Renderer:
         direction,
         length,
         label_text,
+        lc: str,
         color="green",
+        **kwargs
     ):
         raise NotImplementedError("Plotting area loads is currently not implemented")
         # # Find the direction cosines for the direction the load acts in
@@ -1430,12 +1520,25 @@ class Renderer:
         else:
             # Set up a load combination dictionary that represents the load case
             load_factors = {self.case: 1}
-
+        # Map load cases to colors so they can be differentiated on the plot
+        color_sequence = getattr(px.colors.qualitative, self.load_color_sequence)
+        load_cases_in_model = set()
+        for load_combo in self.model.load_combos.values():
+            factors = load_combo.factors
+            for lc in factors.keys():
+                load_cases_in_model.add(lc)
+        lc_color_map = dict(zip(load_cases_in_model, color_sequence))
+        lcs_in_legend = set()
         # Step through each node
         for node in self.model.nodes.values():
             # Step through and display each nodal load
             for load in node.NodeLoads:
                 # Determine if this load is part of the requested LoadCombo or case
+                if load[2] not in lcs_in_legend:
+                    showlegend=True
+                    lcs_in_legend.add(load[2])
+                else:
+                    showlegend=False
                 if load[2] in load_factors:
                     # Calculate the factored value for this load and it's sign (positive or
                     # negative)
@@ -1460,7 +1563,10 @@ class Renderer:
                             direction,
                             abs(load_value / max_pt_load) * 5 * self.annotation_size,
                             load_value,
-                            "green",
+                            name=load[2],
+                            color=lc_color_map[load[2]],
+                            showlegend=showlegend,
+                            legendgroup=load[2],
                         )
                     elif load[0] in {"MX", "MY", "MZ"}:
                         self.plot_moment(
@@ -1468,7 +1574,10 @@ class Renderer:
                             direction,
                             abs(load_value / max_moment) * 2.5 * self.annotation_size,
                             str(load_value),
-                            "green",
+                            name=load[2],
+                            color=lc_color_map[load[2]],
+                            showlegend=showlegend,
+                            legendgroup=load[2]
                         )
 
         # Step through each member
@@ -1486,6 +1595,11 @@ class Renderer:
             # Step through each member point load
             for load in member.PtLoads:
                 # Determine if this load is part of the requested load combination
+                if load[3] not in lcs_in_legend:
+                    showlegend=True
+                    lcs_in_legend.add(load[3])
+                else:
+                    showlegend=False
                 if load[3] in load_factors:
                     # Calculate the factored value for this load and it's sign (positive or negative)
                     load_value = load[1] * load_factors[load[3]]
@@ -1506,6 +1620,10 @@ class Renderer:
                             dir_cos[0, :],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            name=load[3],
+                            legendgroup=load[3],
                         )
                     elif load[0] == "Fy":
                         self.plot_pt_load(
@@ -1513,6 +1631,10 @@ class Renderer:
                             dir_cos[1, :],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "Fz":
                         self.plot_pt_load(
@@ -1520,6 +1642,10 @@ class Renderer:
                             dir_cos[2, :],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "Mx":
                         self.plot_moment(
@@ -1527,6 +1653,10 @@ class Renderer:
                             dir_cos[0, :] * sign,
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "My":
                         self.plot_moment(
@@ -1534,6 +1664,10 @@ class Renderer:
                             dir_cos[1, :] * sign,
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "Mz":
                         self.plot_moment(
@@ -1541,6 +1675,10 @@ class Renderer:
                             dir_cos[2, :] * sign,
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "FX":
                         self.plot_pt_load(
@@ -1548,6 +1686,10 @@ class Renderer:
                             [1, 0, 0],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "FY":
                         self.plot_pt_load(
@@ -1555,6 +1697,10 @@ class Renderer:
                             [0, 1, 0],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "FZ":
                         self.plot_pt_load(
@@ -1562,6 +1708,10 @@ class Renderer:
                             [0, 0, 1],
                             load_value / max_pt_load * 5 * self.annotation_size,
                             load_value,
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "MX":
                         self.plot_moment(
@@ -1569,6 +1719,10 @@ class Renderer:
                             [1 * sign, 0, 0],
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "MY":
                         self.plot_moment(
@@ -1576,6 +1730,10 @@ class Renderer:
                             [0, 1 * sign, 0],
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
                     elif load[0] == "MZ":
                         self.plot_moment(
@@ -1583,10 +1741,20 @@ class Renderer:
                             [0, 0, 1 * sign],
                             abs(load_value) / max_moment * 2.5 * self.annotation_size,
                             str(load_value),
+                            name=load[3],
+                            color=lc_color_map[load[3]],
+                            showlegend=showlegend,
+                            legendgroup=load[3],
                         )
 
             # Step through each member distributed load
+            showlegend=None
             for load in member.DistLoads:
+                if load[5] not in lcs_in_legend:
+                    showlegend=True
+                    lcs_in_legend.add(load[5])
+                else:
+                    showlegend=False
                 # Determine if this load is part of the requested load combination
                 if load[5] in load_factors:
                     # Calculate the factored value for this load and it's sign (positive or negative)
@@ -1632,10 +1800,14 @@ class Renderer:
                             w2 / max_dist_load * 5 * self.annotation_size,
                             str(sig_fig_round(w1, 3)),
                             str(sig_fig_round(w2, 3)),
-                            "green",
+                            lc_color_map[load[5]],
+                            showlegend=showlegend,
+                            name=load[5],
+                            legendgroup=load[5],
                         )
 
         # Step through each plate
+        showlegend=True
         for plate in list(self.model.plates.values()) + list(self.model.quads.values()):
             # Get the direction cosines for the plate's local z-axis
             dir_cos = plate.T()[0:3, 0:3]
@@ -1643,6 +1815,11 @@ class Renderer:
 
             # Step through each plate load
             for load in plate.pressures:
+                if load[1] not in lcs_in_legend:
+                    showlegend=True
+                    lcs_in_legend.add(load[1])
+                else:
+                    showlegend=False
                 # Determine if this load is part of the requested load combination
                 if load[1] in load_factors:
                     # Calculate the factored value for this load
@@ -1669,7 +1846,10 @@ class Renderer:
                         dir_cos * sign,
                         load_value / max_area_load * 5 * self.annotation_size,
                         str(sig_fig_round(load_value, 3)),
-                        color="green",
+                        name=load[1],
+                        color=lc_color_map[load[1]],
+                        showlegend=showlegend,
+                        legendgroup=load[1]
                     )
 
     def add_point_labels(
@@ -1696,18 +1876,15 @@ class Renderer:
             end_bold_tag = "</b>"
         annotations = []
         for idx, point in enumerate(points):
-            label = labels[idx]
+            if isinstance(labels[idx], list):
+                label, text_color = labels[idx]
+                print(f"{label=} | {text_color=}")
+            else:
+                label = labels[idx]
             x, y, z = point
             text_label = f"{start_bold_tag}{label}{end_bold_tag}"
-            if render_points_as_spheres:
-                ...
-                self.plotter.add_trace(
-                    prims.sphere(
-                        size=self.annotation_size/60,
-                        center=(x, y, z),
-                        color=point_color
-                    )
-                )
+
+
             # print(f"Annotation: {text_label=} | {point=}")
             annotations.append(
                 dict(
@@ -1798,7 +1975,7 @@ def default_layout(title: str):
         aspectmode = "data",
         dragmode="turntable"
     )
-    layout.legend.visible = False
+    layout.legend.visible = True
     return layout
 
 
