@@ -1878,14 +1878,11 @@ class Renderer:
         for idx, point in enumerate(points):
             if isinstance(labels[idx], list):
                 label, text_color = labels[idx]
-                print(f"{label=} | {text_color=}")
             else:
                 label = labels[idx]
             x, y, z = point
             text_label = f"{start_bold_tag}{label}{end_bold_tag}"
 
-
-            # print(f"Annotation: {text_label=} | {point=}")
             annotations.append(
                 dict(
                     x=x, 
