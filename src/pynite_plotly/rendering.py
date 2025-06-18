@@ -579,7 +579,7 @@ class Renderer:
                         direction=(0, 0, -1),
                         height=self.annotation_size * 0.6,
                         radius=self.annotation_size * 0.3,
-                        color=self.colors["node"],
+                        color=self.colors["node"]
                     ))
 
                 )
@@ -1702,8 +1702,10 @@ class Renderer:
             if render_points_as_spheres:
                 ...
                 self.plotter.add_trace(
-                    go.Scatter3d(
-                        x=[x], y=[y], z=[z], marker=dict(color=point_color, size=self.annotation_size/30)
+                    prims.sphere(
+                        size=self.annotation_size/60,
+                        center=(x, y, z),
+                        color=point_color
                     )
                 )
             # print(f"Annotation: {text_label=} | {point=}")
