@@ -1,8 +1,8 @@
 [project]
 name = "pynite-plotly"
-version = "0.3.0"
 description = "Add your description here"
 readme = "README.md"
+dynamic = ["version", "description"]
 authors = [
     { name = "Connor Ferster", email = "connor@structuralpython.com" }
 ]
